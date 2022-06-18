@@ -7,9 +7,9 @@ START=$(date +%s%N)
 
 
 if [ -n "$1" ]; then
-	valgrind ./philosophers 1;
+	valgrind ./philo 1;
 else
-	./philosophers 4 410 200 200;
+	./philo 4 410 200 200;
 fi
 
 

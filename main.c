@@ -93,23 +93,19 @@ void *philo_life(void *arg)
 			printf("%ld %d IS DIED\n", timer() - first_time, philosopher->id);
 			return (NULL);
 		}
-		// printf("%ld %d is eating\n", timer() - first_time, philosopher->id);
 		printf_mod(philosopher->printf_mutex, timer() - first_time, philosopher->id, "is eating\n");
 		last_dinner = timer();
 		usleep(philosopher->time_to_eat);
 		pthread_mutex_unlock(&philosopher->forks[philosopher->left_fork]);
 		pthread_mutex_unlock(&philosopher->forks[philosopher->right_fork]);
 		
-		// printf("%ld %d is thinking\n", timer() - first_time, philosopher->id);
 		printf_mod(philosopher->printf_mutex, timer() - first_time, philosopher->id, "is thiking\n");
 		
 
-		// printf("%ld %d is sleeping\n", timer() - first_time, philosopher->id);
 		printf_mod(philosopher->printf_mutex, timer() - first_time, philosopher->id, "is sleeping\n");
 		
 
 		usleep(philosopher->time_to_sleep);
-		// printf("%ld %d is thinking\n", timer() - first_time, philosopher->id);
 		printf_mod(philosopher->printf_mutex, timer() - first_time, philosopher->id, "is thiking\n");
 		
 
