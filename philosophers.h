@@ -13,49 +13,40 @@
 
 #include "libft/libft.h"
 
-typedef struct s_data
+typedef struct s_rules
 {
-	int i;
-}	t_data;
+	int	n_philo;
+	int	time_to_die;
+	int	time_to_eat;
+	int	time_to_sleep;
+	int	satiety;
+}	t_rules;
 
 typedef struct s_philo
 {
-	pthread_t	p_index;
-	int			id;
-
-	int	left_fork;
-	int right_fork;
-
-	int eating_status;
-	int sleeping_status;
-	int thinking_status;
-
-	pthread_mutex_t *forks;
-
-	pthread_mutex_t		*printf_mutex;
-
-	int		n_philo;
-	int		time_to_die;
-	int		time_to_eat;
-	int		time_to_sleep;
-	int		satiety;
-
+	int				id;
+	int				left_fork;
+	int				right_fork;
+	int				n_dinner;
+	long			last_dinner;
+	struct s_data	*data;
 }	t_philo;
 
 
-typedef struct s_general
+typedef struct s_data
 {
-	int		n_philo;
-	int		time_to_die;
-	int		time_to_eat;
-	int		time_to_sleep;
-	int		satiety;
-
-	t_philo			*philosophers;
+	long			start_time;
+	t_rules			*rules;
+	t_philo			*phils;
+	pthread_t		*threads;
 	pthread_mutex_t	*forks;
-}	t_general;
+	pthread_mutex_t	printf_mutex;
+}	t_data;
 
 
-int	check_args(t_general *general, int argc, char **argv);
+t_rules	*check_args(int argc, char **argv);
+int	mem_alloc(t_data *data);
+int	prepare_dinner(t_data *data);
+
 
 #endif

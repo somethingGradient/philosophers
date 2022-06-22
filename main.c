@@ -1,58 +1,32 @@
 
 #include "philosophers.h"
 
-void	free_data(t_general *general)
+void	free_data(t_data *data)
 {
-	if (general)
+	int	i;
+
+	if (data)
 	{
-		free(general);
-		general = NULL;
+		i = -1;
+		if (data->phils)
+		{
+			while (++i < data->rules->n_philo)
+				data->phils[i].data = NULL;
+			free(data->phils);
+		}
+		if (data->rules)
+			free(data->rules);
+		if (data->threads)
+			free(data->threads);
+		if (data->forks)
+			free(data->forks);
+		data->phils = NULL;
+		data->rules = NULL;
+		data->threads = NULL;
+		data->forks = NULL;
+		free(data);
+		data = NULL;
 	}
-}
-
-void	init_threads(t_general *general)
-{
-	t_philo				*philosophers;
-	pthread_t			*philo_threads;
-	pthread_mutex_t		*forks;
-
-	
-	pthread_mutex_t 	*printf_mutex;
-	printf_mutex = NULL;
-	printf_mutex = malloc(sizeof(*printf_mutex));
-	pthread_mutex_init(printf_mutex, NULL);
-
-
-	philo_threads = (pthread_t *)malloc(sizeof(*philo_threads) * general->n_philo);
-	philosophers = (t_philo *)malloc(sizeof(*philosophers) * general->n_philo);
-	forks = (pthread_mutex_t *)malloc(sizeof(*forks) * general->n_philo);
-	int i = -1;
-	while (++i < general->n_philo)
-	{
-		philosophers[i].printf_mutex = printf_mutex;
-
-		philosophers[i].id = i + 1;
-		philosophers[i].left_fork = i;
-		if (i == general->n_philo - 1)
-			philosophers[i].right_fork = 0;
-		else
-			philosophers[i].right_fork = i + 1;	
-		pthread_mutex_init(&forks[i], NULL);
-		
-
-
-		philosophers[i].time_to_die = general->time_to_die;
-		philosophers[i].time_to_eat = general->time_to_eat;
-		philosophers[i].time_to_sleep = general->time_to_sleep;
-		philosophers[i].satiety = general->satiety;
-
-	}
-	i = -1;
-	while (++i < general->n_philo)
-		philosophers[i].forks = forks;
-	general->philosophers = philosophers;
-	philosophers = NULL;
-	forks = NULL;
 }
 
 long	timer()
@@ -61,6 +35,22 @@ long	timer()
 	gettimeofday(&temp, NULL);
 	long result = (long)(temp.tv_sec * 1000 + temp.tv_usec / 1000);
 	return result;
+}
+
+void	ft_destroy_mutex(t_data *data)
+{
+	int	i;
+
+	i = -1;
+	while (++i < data->rules->n_philo)
+		pthread_mutex_destroy(&data->forks[i]);
+	pthread_mutex_destroy(&data->printf_mutex);
+}
+
+void	ft_error(t_data *data, char *str)
+{
+	free_data(data);
+	printf("%s\n", str);
 }
 
 void	printf_mod(pthread_mutex_t *printf_mutex, long time, int id, char *msg)
@@ -72,89 +62,88 @@ void	printf_mod(pthread_mutex_t *printf_mutex, long time, int id, char *msg)
 
 void *philo_life(void *arg)
 {
-	t_philo *philosopher = (t_philo *)arg;
+	long		time_status;
+	t_philo		*philo;
+	t_data		*data;
 
-	long last_dinner = timer();
-	long first_time = last_dinner;
-	if (philosopher->id % 2 == 0)
+	philo = (t_philo *)arg;
+	data = philo[0].data;
+	philo->last_dinner = timer();
+	if (philo->id % 2 == 0)
 		usleep(50);
-	long time_status;
-
 	while (1)
 	{
-		// printf("|%ld|*%ld*\n", (long)philosopher->time_to_die / 1000, time_status);	
-		time_status = timer() - last_dinner;
-		pthread_mutex_lock(&philosopher->forks[philosopher->left_fork]);
-		pthread_mutex_lock(&philosopher->forks[philosopher->right_fork]);
-		if ((long)philosopher->time_to_die / 1000 - time_status < 0)
+		time_status = timer() - philo->last_dinner;
+		pthread_mutex_lock(&data->forks[philo->left_fork]);
+		pthread_mutex_lock(&data->forks[philo->right_fork]);
+		if ((long)data->rules->time_to_die / 1000 - time_status < 0)
 		{
-			pthread_mutex_unlock(&philosopher->forks[philosopher->left_fork]);
-			pthread_mutex_unlock(&philosopher->forks[philosopher->right_fork]);
-			printf("%ld %d IS DIED\n", timer() - first_time, philosopher->id);
+			pthread_mutex_unlock(&data->forks[philo->left_fork]);
+			pthread_mutex_unlock(&data->forks[philo->right_fork]);
+			printf("%ld %d is dead\n", timer() - data->start_time, philo->id);
 			return (NULL);
 		}
-		printf_mod(philosopher->printf_mutex, timer() - first_time, philosopher->id, "is eating\n");
-		last_dinner = timer();
-		usleep(philosopher->time_to_eat);
-		pthread_mutex_unlock(&philosopher->forks[philosopher->left_fork]);
-		pthread_mutex_unlock(&philosopher->forks[philosopher->right_fork]);
-		
-		printf_mod(philosopher->printf_mutex, timer() - first_time, philosopher->id, "is thiking\n");
-		
-
-		printf_mod(philosopher->printf_mutex, timer() - first_time, philosopher->id, "is sleeping\n");
-		
-
-		usleep(philosopher->time_to_sleep);
-		printf_mod(philosopher->printf_mutex, timer() - first_time, philosopher->id, "is thiking\n");
-		
-
-		if (philosopher->satiety > -1)
+		printf_mod(&data->printf_mutex, timer() - data->start_time, philo->id, "is eating\n");
+		philo->last_dinner = timer();
+		usleep(data->rules->time_to_eat);
+		philo->n_dinner++;
+		pthread_mutex_unlock(&data->forks[philo->left_fork]);
+		pthread_mutex_unlock(&data->forks[philo->right_fork]);
+		printf_mod(&data->printf_mutex, timer() - data->start_time, philo->id, "is thiking\n");
+		printf_mod(&data->printf_mutex, timer() - data->start_time, philo->id, "is sleeping\n");
+		usleep(data->rules->time_to_sleep);
+		printf_mod(&data->printf_mutex, timer() - data->start_time, philo->id, "is thiking\n");
+		if (data->rules->satiety > -1)
 		{
-			if (philosopher->satiety == 1)
+			if (philo->n_dinner > data->rules->satiety)
 			{
-				printf("%ld %d IS SATIETY.\n", timer() - first_time, philosopher->id);
+				printf("%ld %d IS SATIETY.\n", timer() - data->start_time, philo->id);
 				return (NULL);
 			}
-			philosopher->satiety--;
+			data->rules->satiety--;
 		}
 	}
 }
 
-
-
-
-
-
-
 int main(int argc, char **argv)
 {
-	t_general	*general;
-	char *error = NULL;
+	t_data	*data;
+	int		i;
 
-	general = NULL;
-	general = (t_general *)malloc(sizeof(*general));
-	if (check_args(general, argc, argv) < 0)
+	data = NULL;
+	data = (t_data *)malloc(sizeof(*data));
+	data->phils = NULL;
+	data->forks = NULL;
+	data->threads = NULL;
+	data->rules = NULL;
+	data->rules = check_args(argc, argv);
+	if (!data->rules)
 	{
-		ft_putstr_fd("Invalid arguments.", 1);
-		free_data(general);
+		ft_error(data, "Invalid arguments.");
 		return (-1);
 	}
-
-	init_threads(general);
-
-
-	int i = -1;
-	while (++i < general->n_philo)
-		pthread_create(&general->philosophers[i].p_index, NULL, philo_life, &general->philosophers[i]);
-
+	if (mem_alloc(data))
+	{
+		ft_error(data, "Error allocation memory.");
+		return (-1);
+	}
+	if (prepare_dinner(data))
+	{
+		ft_error(data, "Table is broken.");
+		return (-1);
+	}
+	data->start_time = timer();
+	i = -1;
+	while (++i < data->rules->n_philo)
+		pthread_create(&data->threads[i], NULL, philo_life, &data->phils[i]);
 	
 	i = -1;
-	while (++i < general->n_philo)
-		pthread_join(general->philosophers[i].p_index, (void *)&error);
+	while (++i < data->rules->n_philo)
+		pthread_join(data->threads[i], NULL);
 
-	// pthread_join(general->philosophers[0].p_index, NULL);
-	printf("\n|%s|", error);
-	printf("\n=========================\n%d", errno);
+	ft_destroy_mutex(data);
+	free_data(data);
+
+	// printf("\n=========================\n%d", errno);
 	return (0);
 }
