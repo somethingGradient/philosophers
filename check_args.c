@@ -1,38 +1,32 @@
 
 #include "philosophers.h"
 
-t_rules	*check_args(int argc, char **argv)
+int	check_args(t_data *data, int argc, char **argv)
 {
-	t_rules	*rules;
-
-	rules = NULL;
 	if (argc != 5 && argc != 6)
-		return (NULL);
-	rules = (t_rules *)malloc(sizeof(*rules));
-	if (!rules)
-		return (NULL);
-	rules->n_philo = ft_atoi(argv[1]);
-	rules->time_to_die = ft_atoi(argv[2]) * 1000;
-	rules->time_to_eat = ft_atoi(argv[3]) * 1000;
-	rules->time_to_sleep = ft_atoi(argv[4]) * 1000;
-	rules->satiety = -1;
+		return (1);
+	data->rules = (t_rules *)malloc(sizeof(*data->rules));
+	if (!data->rules)
+		return (1);
+	data->rules->n_philo = ft_atoi(argv[1]);
+	data->rules->time_to_die = ft_atoi(argv[2]) * 1000;
+	data->rules->time_to_eat = ft_atoi(argv[3]) * 1000;
+	data->rules->time_to_sleep = ft_atoi(argv[4]) * 1000;
+	data->rules->satiety = -1;
 	if (argc == 6)
 	{
-		rules->satiety = ft_atoi(argv[5]);
-		if (rules->satiety <= 0)
-			return (NULL);
+		data->rules->satiety = ft_atoi(argv[5]);
+		if (data->rules->satiety <= 0)
+			return (1);
 	}
-	if (rules->n_philo <= 0 || rules->time_to_die <= 0 ||
-		rules->time_to_eat <= 0 || rules->time_to_sleep <= 0)
-		return (NULL);
-	return (rules);
+	if (data->rules->n_philo <= 1 || data->rules->time_to_die <= 0 ||
+		data->rules->time_to_eat <= 0 || data->rules->time_to_sleep <= 0)
+		return (1);
+	return (0);
 }
 
-int	mem_alloc(t_data *data)
+int	prepare_dinner(t_data *data, int i)
 {
-	data->phils = NULL;
-	data->threads = NULL;
-	data->forks = NULL;
 	data->phils = (t_philo *)malloc(sizeof(*data->phils)
 		* data->rules->n_philo);
 	data->threads = (pthread_t *)malloc(sizeof(*data->threads)
@@ -41,15 +35,6 @@ int	mem_alloc(t_data *data)
 		* data->rules->n_philo);
 	if (!data->phils || !data->threads || !data->forks)
 		return (1);
-	return (0);
-
-}
-
-int	prepare_dinner(t_data *data)
-{
-	int	i;
-
-	i = -1;
 	while (++i < data->rules->n_philo)
 	{
 		data->phils[i].id = i + 1;

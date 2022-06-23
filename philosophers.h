@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -43,10 +42,9 @@ typedef struct s_data
 	pthread_mutex_t	printf_mutex;
 }	t_data;
 
+int	check_args(t_data *data, int argc, char **argv);
 
-t_rules	*check_args(int argc, char **argv);
-int	mem_alloc(t_data *data);
-int	prepare_dinner(t_data *data);
+int	prepare_dinner(t_data *data, int i);
 
 
 #endif

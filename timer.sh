@@ -7,9 +7,9 @@ START=$(date +%s%N)
 
 
 if [ -n "$1" ]; then
-	valgrind --leak-check=full ./philo 2 600 300 200 0;
+	valgrind  --tool=helgrind ./philo 2 120 21 10 1;
 else
-	./philo 2 600 300 200 2;
+	./philo 6 3100 1000 2000 ;
 fi
 
 

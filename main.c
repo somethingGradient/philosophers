@@ -31,10 +31,12 @@ void	free_data(t_data *data)
 
 long	timer()
 {
-	struct timeval temp;
+	long			result;
+	struct timeval	temp;
+
 	gettimeofday(&temp, NULL);
-	long result = (long)(temp.tv_sec * 1000 + temp.tv_usec / 1000);
-	return result;
+	result = (long)(temp.tv_sec * 1000 + temp.tv_usec / 1000);
+	return (result);
 }
 
 void	ft_destroy_mutex(t_data *data)
@@ -105,6 +107,22 @@ void *philo_life(void *arg)
 	}
 }
 
+int	birth_of_philosophy(t_data *data, int argc, char **argv)
+{
+	if (check_args(data, argc, argv))
+	{
+		ft_error(data, "Invalid arguments.");
+		return (1);
+	}
+	if (prepare_dinner(data, -1))
+	{
+		ft_error(data, "Dinner will not take place.");
+		return (1);
+	}
+	data->start_time = timer();
+	return (0);
+}
+
 int main(int argc, char **argv)
 {
 	t_data	*data;
@@ -112,38 +130,21 @@ int main(int argc, char **argv)
 
 	data = NULL;
 	data = (t_data *)malloc(sizeof(*data));
+	if (!data)
+		return (1);
 	data->phils = NULL;
 	data->forks = NULL;
 	data->threads = NULL;
 	data->rules = NULL;
-	data->rules = check_args(argc, argv);
-	if (!data->rules)
-	{
-		ft_error(data, "Invalid arguments.");
-		return (-1);
-	}
-	if (mem_alloc(data))
-	{
-		ft_error(data, "Error allocation memory.");
-		return (-1);
-	}
-	if (prepare_dinner(data))
-	{
-		ft_error(data, "Table is broken.");
-		return (-1);
-	}
-	data->start_time = timer();
+	if (birth_of_philosophy(data, argc, argv))
+		return (1);
 	i = -1;
 	while (++i < data->rules->n_philo)
 		pthread_create(&data->threads[i], NULL, philo_life, &data->phils[i]);
-	
 	i = -1;
 	while (++i < data->rules->n_philo)
 		pthread_join(data->threads[i], NULL);
-
 	ft_destroy_mutex(data);
 	free_data(data);
-
-	// printf("\n=========================\n%d", errno);
 	return (0);
 }
