@@ -19,7 +19,7 @@ int	check_args(t_data *data, int argc, char **argv)
 		if (data->rules->satiety <= 0)
 			return (1);
 	}
-	if (data->rules->n_philo < 1 || data->rules->time_to_die <= 0 ||
+	if (data->rules->n_philo < 1 || data->rules->n_philo > 199 || data->rules->time_to_die <= 0 ||
 		data->rules->time_to_eat <= 0 || data->rules->time_to_sleep <= 0)
 		return (1);
 	return (0);
@@ -45,8 +45,7 @@ int	prepare_dinner(t_data *data, int i)
 			data->phils[i].right_fork = i + 1;
 		pthread_mutex_init(&data->forks[i], NULL);
 		data->phils[i].data = data;
-		data->phils[i].n_dinner = 0;
-		data->phils[i].satiety_status = 0;
+		data->phils[i].n_dinner = data->rules->satiety;
 	}
 	if (pthread_mutex_init(&data->printf_mutex, NULL))
 		return (1);

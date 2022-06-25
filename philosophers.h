@@ -23,7 +23,6 @@ typedef struct s_rules
 
 typedef struct s_philo
 {
-	int				satiety_status;
 	int				id;
 	int				left_fork;
 	int				right_fork;

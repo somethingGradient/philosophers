@@ -62,6 +62,40 @@ void	printf_mod(t_data *data, int id, char *msg)
 	pthread_mutex_unlock(&data->printf_mutex);
 }
 
+int	philo_eat(t_data *data, t_philo *philo)
+{
+	if (data->death_status)
+		return (1);
+	pthread_mutex_lock(&data->forks[philo->left_fork]);
+	pthread_mutex_lock(&data->forks[philo->right_fork]);
+	if (data->death_status)
+		return (1);
+	printf_mod(data, philo->id, "has taken a fork\n");
+	usleep(data->rules->time_to_eat);
+	philo->last_dinner = timer();
+	philo->n_dinner--;
+	pthread_mutex_unlock(&data->forks[philo->left_fork]);
+	pthread_mutex_unlock(&data->forks[philo->right_fork]);
+	return (0);
+}
+
+int philo_think(t_data *data, t_philo *philo)
+{
+	if (data->death_status)
+		return (1);
+	printf_mod(data, philo->id, "is thinking\n");
+	return (0);
+}
+
+int philo_sleep(t_data *data, t_philo *philo)
+{
+	if (data->death_status)
+		return (1);
+	printf_mod(data, philo->id, "is sleeping\n");
+	usleep(data->rules->time_to_sleep);
+	return (0);
+}
+
 void *philo_life(void *arg)
 {
 	t_philo		*philo;
@@ -70,37 +104,20 @@ void *philo_life(void *arg)
 	philo = (t_philo *)arg;
 	data = philo[0].data;
 	if (philo->id % 2 == 0)
-		usleep(5);
+		usleep(10);
 	philo->last_dinner = timer();
-	while (1)
+	while (!data->death_status)
 	{
-		pthread_mutex_lock(&data->forks[philo->left_fork]);
-		pthread_mutex_lock(&data->forks[philo->right_fork]);
-		if (data->rules->n_philo == 1)
+		if (philo_eat(data, philo))
 			return (NULL);
-		printf_mod(data, philo->id, "is eating\n");
-		usleep(data->rules->time_to_eat);
-		philo->last_dinner = timer();
-		philo->n_dinner++;
-		pthread_mutex_unlock(&data->forks[philo->left_fork]);
-		pthread_mutex_unlock(&data->forks[philo->right_fork]);
-		printf_mod(data, philo->id, "is thiking\n");
-		printf_mod(data, philo->id, "is sleeping\n");
-		usleep(data->rules->time_to_sleep);
-		printf_mod(data, philo->id, "is thiking\n");
-		if (data->death_status || philo->satiety_status)
+		if (philo_think(data, philo))
 			return (NULL);
-		if (data->rules->satiety > -1)
-		{
-			if (!philo->satiety_status)
-			{
-				if (philo->n_dinner >= data->rules->satiety)
-				{
-					printf_mod(data, philo->id, "is satiety\n");
-					return (NULL);
-				}
-			}
-		}
+		if (philo_sleep(data, philo))
+			return (NULL);
+		if (philo_think(data, philo))
+			return (NULL);
+		if (data->death_status)
+			return (NULL);
 	}
 }
 
@@ -126,31 +143,32 @@ void	*death_checker(void *arg)
 	t_data	*data;
 	int flag;
 
-	usleep(50);
+	usleep(10);
 	data = (t_data *)arg;
 	while (1)
 	{
-		flag = 0;
 		i = -1;
 		while (++i < data->rules->n_philo)
 		{
-			if (data->phils[i].satiety_status)
+			if (data->phils[i].n_dinner == 0)
 			{
-				flag++;
-				continue ;
+				data->phils[i].n_dinner = -1;
+				data->satiety_status += 1;
+				if (data->satiety_status == data->rules->n_philo)
+				{
+					data->death_status = 1;
+					return (NULL);
+				}
 			}
 			if (timer() - data->phils[i].last_dinner > (long)data->rules->time_to_die)
 			{
 				pthread_mutex_unlock(&data->forks[data->phils[i].left_fork]);
 				pthread_mutex_unlock(&data->forks[data->phils[i].right_fork]);
 				printf_mod(data, data->phils[i].id, "is died\n");
-				usleep(1000);
 				data->death_status = 1;
 				return (NULL);
 			}
 		}
-		if (flag == data->rules->n_philo)
-			return (NULL);
 	}
 }
 

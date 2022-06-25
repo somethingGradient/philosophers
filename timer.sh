@@ -7,7 +7,7 @@ START=$(date +%s%N)
 
 
 if [ -n "$1" ]; then
-	leaks --atExit -- ./philo 2 120 21 10 1;
+	leaks --atExit -- ./philo 2 1020 1000 30 1;
 else
 	./philo 2 1100 500 500 1;
 fi
