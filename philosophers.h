@@ -23,6 +23,7 @@ typedef struct s_rules
 
 typedef struct s_philo
 {
+	int				satiety_status;
 	int				id;
 	int				left_fork;
 	int				right_fork;
@@ -34,6 +35,8 @@ typedef struct s_philo
 
 typedef struct s_data
 {
+	int				satiety_status;
+	int				death_status;
 	long			start_time;
 	t_rules			*rules;
 	t_philo			*phils;
@@ -43,7 +46,6 @@ typedef struct s_data
 }	t_data;
 
 int	check_args(t_data *data, int argc, char **argv);
-
 int	prepare_dinner(t_data *data, int i);
 
 
