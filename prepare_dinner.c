@@ -51,3 +51,19 @@ int	prepare_dinner(t_data *data, int i)
 		return (1);
 	return (0);
 }
+
+int	birth_of_philosophy(t_data *data, int argc, char **argv)
+{
+	if (check_args(data, argc, argv))
+	{
+		ft_error(data, "Invalid arguments.");
+		return (1);
+	}
+	if (prepare_dinner(data, -1))
+	{
+		ft_error(data, "Dinner will not take place.");
+		return (1);
+	}
+	data->start_time = timer();
+	return (0);
+}

@@ -8,8 +8,8 @@ CC			=	gcc
 
 FLAGS		=	-Wall -Wextra -Werror
 
-SRC			=	main.c \
-				check_args.c \
+SRC			=	main.c utils.c \
+				prepare_dinner.c \
 
 OBJ		=	$(SRC:.c=.o)
 
