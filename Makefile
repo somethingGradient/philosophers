@@ -30,7 +30,7 @@ OBJ		=	$(SRC:.c=.o)
 all: $(NAME)
 
 $(NAME): $(OBJ) $(HEADER)
-		@$(CC) -g $(OBJ) $(INCLUDES) -o $(NAME)
+		@$(CC) $(FLAGS) -g $(OBJ) $(INCLUDES) -o $(NAME)
 		@echo Compiled!  #-fsanitize=thread
 	
 

@@ -104,10 +104,10 @@ int	main(int argc, char **argv)
 	pthread_create(&checker, NULL, &death_checker, data);
 	i = -1;
 	while (++i < data->rules->n_philo)
-	{
 		pthread_create(&data->threads[i], NULL, &philo_life, &data->phils[i]);
-		pthread_detach(data->threads[i]);
-	}
+	i = -1;
+	while (++i < data->rules->n_philo)
+		pthread_join(data->threads[i], NULL);
 	pthread_join(checker, NULL);
 	ft_destroy_mutex(data);
 	free_data(data);

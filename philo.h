@@ -65,6 +65,7 @@ typedef struct s_data
 	pthread_mutex_t	printf_mutex;
 }	t_data;
 
+void	printf_mod(t_data *data, int id, char *msg, char *color);
 int		philo_think(t_data *data, t_philo *philo);
 int		philo_sleep(t_data *data, t_philo *philo);
 int		philo_eat(t_data *data, t_philo *philo);
