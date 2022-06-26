@@ -1,5 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   prepare_dinner.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: akitty <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/06/26 16:29:19 by akitty            #+#    #+#             */
+/*   Updated: 2022/06/26 16:29:20 by akitty           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include "philosophers.h"
+#include "philo.h"
 
 int	check_args(t_data *data, int argc, char **argv)
 {
@@ -9,9 +20,9 @@ int	check_args(t_data *data, int argc, char **argv)
 	if (!data->rules)
 		return (1);
 	data->rules->n_philo = ft_atoi(argv[1]);
-	data->rules->time_to_die = ft_atoi(argv[2]) * 1000;
-	data->rules->time_to_eat = ft_atoi(argv[3]) * 1000;
-	data->rules->time_to_sleep = ft_atoi(argv[4]) * 1000;
+	data->rules->time_to_die = ft_atoi(argv[2]);
+	data->rules->time_to_eat = ft_atoi(argv[3]);
+	data->rules->time_to_sleep = ft_atoi(argv[4]);
 	data->rules->satiety = -1;
 	if (argc == 6)
 	{
@@ -19,8 +30,9 @@ int	check_args(t_data *data, int argc, char **argv)
 		if (data->rules->satiety <= 0)
 			return (1);
 	}
-	if (data->rules->n_philo < 1 || data->rules->n_philo > 199 || data->rules->time_to_die <= 0 ||
-		data->rules->time_to_eat <= 0 || data->rules->time_to_sleep <= 0)
+	if (data->rules->n_philo < 1 || data->rules->n_philo > 199
+		|| data->rules->time_to_die <= 0
+		|| data->rules->time_to_eat <= 0 || data->rules->time_to_sleep <= 0)
 		return (1);
 	return (0);
 }
@@ -28,11 +40,11 @@ int	check_args(t_data *data, int argc, char **argv)
 int	prepare_dinner(t_data *data, int i)
 {
 	data->phils = (t_philo *)malloc(sizeof(*data->phils)
-		* data->rules->n_philo);
+			* data->rules->n_philo);
 	data->threads = (pthread_t *)malloc(sizeof(*data->threads)
-		* data->rules->n_philo);
+			* data->rules->n_philo);
 	data->forks = (pthread_mutex_t *)malloc(sizeof(*data->forks)
-		* data->rules->n_philo);
+			* data->rules->n_philo);
 	if (!data->phils || !data->threads || !data->forks)
 		return (1);
 	while (++i < data->rules->n_philo)
@@ -56,14 +68,15 @@ int	birth_of_philosophy(t_data *data, int argc, char **argv)
 {
 	if (check_args(data, argc, argv))
 	{
-		ft_error(data, "Invalid arguments.");
+		ft_error(data, "Invalid arguments.", RED);
 		return (1);
 	}
 	if (prepare_dinner(data, -1))
 	{
-		ft_error(data, "Dinner will not take place.");
+		ft_error(data, "Dinner will not take place.", RED);
 		return (1);
 	}
 	data->start_time = timer();
+	data->death_status = 0;
 	return (0);
 }

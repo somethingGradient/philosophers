@@ -1,44 +1,49 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: akitty <marvin@42.fr>                      +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/06/26 16:30:11 by akitty            #+#    #+#              #
+#    Updated: 2022/06/26 16:30:12 by akitty           ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME		=	philo
 
 INCLUDES	=	-pthread
 
-HEADER		=	philosophers.h
+HEADER		=	philo.h
 
 CC			=	gcc
 
 FLAGS		=	-Wall -Wextra -Werror
 
-SRC			=	main.c utils.c \
-				prepare_dinner.c \
+SRC			=	main.c life_conditions.c prepare_dinner.c \
+				utils.c libft_utils.c  \
 
 OBJ		=	$(SRC:.c=.o)
-
-LIBFT_PATH	=	libft/
-
-LIBFT		=	libft/libft.a
 
 .SILENT: all clean fclean re
 
 all: $(NAME)
 
 $(NAME): $(OBJ) $(HEADER)
-#@$(MAKE) all -C $(LIBFT_PATH)
-		@$(CC) -g $(OBJ) $(LIBFT) $(INCLUDES) -o $(NAME)
-#@echo Compiled!  -fsanitize=thread
+		@$(CC) -g $(OBJ) $(INCLUDES) -o $(NAME)
+		@echo Compiled!  #-fsanitize=thread
 	
 
 %.o: %.c $(HEADER)
 		@$(CC) -c -o $@ $< $(CPPFLAGS)
 
 clean:
-#@$(MAKE) clean -C $(dir $(LIBFT))
 		@rm -rf $(OBJ)
-#@echo Cleaned!
+		@echo Cleaned!
 		
 fclean: clean
-		#@$(MAKE) fclean -C $(dir $(LIBFT))
 		@rm -rf $(NAME)
-		#@echo Full cleaned!
+		@echo Full cleaned!
 
 re: fclean all
 
