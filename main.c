@@ -23,8 +23,8 @@ void	printf_mod(t_data *data, int id, char *msg, char *color)
 	free(msg);
 	msg = temp;
 	temp = NULL;
-	pthread_mutex_lock(&data->printf_mutex);
 	time_status = timer() - data->start_time;
+	pthread_mutex_lock(&data->printf_mutex);
 	printf("%ld.%ld %d %s", time_status / 1000, time_status % 1000, id, msg);
 	pthread_mutex_unlock(&data->printf_mutex);
 	free(msg);
@@ -39,7 +39,7 @@ void	*philo_life(void *arg)
 	philo = (t_philo *)arg;
 	data = philo[0].data;
 	if (philo->id % 2 == 0)
-		ft_sleep(30);
+		ft_sleep(50);
 	philo->last_dinner = timer();
 	while (!data->death_status)
 	{
@@ -52,8 +52,6 @@ void	*philo_life(void *arg)
 			return (NULL);
 		if (philo_think(data, philo))
 			return (NULL);
-		if (data->death_status)
-			return (NULL);
 	}
 }
 
@@ -63,7 +61,7 @@ void	*death_checker(void *arg)
 	int		i;
 
 	data = (t_data *)arg;
-	while (1)
+	while (1337)
 	{
 		i = -1;
 		if (!data->flag_for_checker)

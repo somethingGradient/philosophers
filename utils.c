@@ -53,12 +53,14 @@ long	timer(void)
 void	ft_sleep(long time)
 {
 	long	current_time;
+	long	new_time;
 
 	current_time = timer();
-	while (time > current_time - timer())
+	new_time = current_time;
+	while (time > new_time - current_time)
 	{
 		usleep(100);
-		current_time = timer();
+		new_time = timer();
 	}
 }
 
